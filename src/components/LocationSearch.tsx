@@ -10,9 +10,10 @@ import {
   Button,
   Loader,
   ActionIcon,
+  Center,
 } from "@mantine/core";
 import { useDebouncedValue, useClickOutside } from "@mantine/hooks";
-import { IconX } from "@tabler/icons-react";
+import { IconX, IconFilterOff } from "@tabler/icons-react";
 
 interface LocationSearchProps {
   onBoundsChange: (
@@ -27,6 +28,7 @@ interface LocationSearchProps {
   onLocationFound?: (location: { city?: string; states?: string[] }) => void;
   disabled?: boolean;
   description?: string;
+  reset?: () => void;
 }
 
 interface Prediction {
@@ -35,21 +37,22 @@ interface Prediction {
 }
 
 export function LocationSearch({
+  reset,
   onBoundsChange,
   onFilter,
   onLocationFound,
 }: LocationSearchProps) {
   const [searchValue, setSearchValue] = useState("");
   const [predictions, setPredictions] = useState<Prediction[]>([]);
+  console.log("predictions", predictions);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
 
   const dropdownRef = useClickOutside(() => setShowDropdown(false));
   const mapRef = useRef<google.maps.Map>(null);
-  const [rectangle, setRectangle] = useState<google.maps.Rectangle | null>(
-    null
-  );
+
+  const [rectangles, setRectangles] = useState<google.maps.Rectangle[]>([]);
   const [drawingManager, setDrawingManager] =
     useState<google.maps.drawing.DrawingManager | null>(null);
   const autocompleteService =
@@ -57,13 +60,16 @@ export function LocationSearch({
   const placesService = useRef<google.maps.places.PlacesService>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
 
+  useClickOutside(() => setShowDropdown(false));
+
   const [debouncedSearch] = useDebouncedValue(searchValue, 500);
 
   const handlePlaceSelect = (prediction: Prediction) => {
+    console.log("handlePlaceSelect", prediction);
     if (!mapRef.current || loading) return;
 
-    setIsSelecting(true);
     setLoading(true);
+    setIsSelecting(true);
     setPredictions([]);
 
     if (!placesService.current) {
@@ -146,29 +152,35 @@ export function LocationSearch({
       markerRef.current.setMap(null);
       markerRef.current = null;
     }
+    setIsSelecting(false);
     setSearchValue("");
-    setPredictions([]);
-    setLoading(false);
     onBoundsChange(null);
     onLocationFound?.({ city: undefined, states: undefined });
   };
 
   const clearRectangle = () => {
-    if (rectangle) {
-      rectangle.setMap(null);
-    }
-    setRectangle(null);
+    rectangles.forEach((rect) => rect.setMap(null)); // Remove all from the map
+    setRectangles([]); // Clear state
     onBoundsChange(null);
   };
 
+  const resetAllFilters = () => {
+    clearSearch();
+    clearRectangle();
+    reset?.();
+    setShowDropdown(false);
+    setPredictions([]);
+    setLoading(false);
+    setIsSelecting(false);
+    setSearchValue("");
+  };
+
   const handleRectangleComplete = (rect: google.maps.Rectangle) => {
-    if (rectangle) {
-      rectangle.setMap(null);
-    }
-    setRectangle(rect);
+    setRectangles((prev) => [...prev, rect]); // Store all rectangles
 
     google.maps.event.addListener(rect, "click", () => {
-      clearRectangle();
+      rect.setMap(null);
+      setRectangles((prev) => prev.filter((r) => r !== rect));
     });
 
     const bounds = rect.getBounds();
@@ -199,44 +211,57 @@ export function LocationSearch({
 
       setLoading(true);
       try {
-        const response = await autocompleteService.current.getPlacePredictions({
-          input: debouncedSearch,
-          componentRestrictions: { country: "us" },
-          types: ["(cities)"],
-        });
-        setPredictions(response.predictions);
+        const response = await autocompleteService.current?.getPlacePredictions(
+          {
+            input: debouncedSearch,
+            componentRestrictions: { country: "us" },
+            types: ["(cities)"],
+          }
+        );
+        setPredictions(response!.predictions);
         setShowDropdown(true);
       } catch (error) {
         console.error("Error fetching predictions:", error);
       } finally {
         setLoading(false);
-        setIsSelecting(false);
       }
     };
 
     fetchPredictions();
-  }, [debouncedSearch, isSelecting]);
+  }, [debouncedSearch]);
 
   return (
     <Stack>
       <Box style={{ position: "relative" }} ref={dropdownRef}>
-        <TextInput
-          label="Search by location"
-          placeholder="Enter a US city"
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.currentTarget.value)}
-          rightSection={
-            loading ? (
-              <Loader size="xs" />
-            ) : (
-              searchValue && (
-                <ActionIcon size="sm" onClick={clearSearch} color="red">
-                  <IconX size={16} />
-                </ActionIcon>
+        <Group w="100%" justify="space-between" align="center">
+          <TextInput
+            label="Search by location"
+            placeholder="Enter a US city"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.currentTarget.value)}
+            rightSection={
+              loading ? (
+                <Loader size="xs" />
+              ) : (
+                searchValue && (
+                  <ActionIcon size="sm" onClick={clearSearch} color="red">
+                    <IconX size={16} />
+                  </ActionIcon>
+                )
               )
-            )
-          }
-        />
+            }
+          />
+          <Box pt="lg">
+            <Button
+              variant="light"
+              color="gray"
+              onClick={resetAllFilters}
+              leftSection={<IconFilterOff size={16} />}
+            >
+              Reset All Filters
+            </Button>
+          </Box>
+        </Group>
         {showDropdown && predictions.length > 0 && (
           <Paper
             shadow="md"
@@ -255,10 +280,11 @@ export function LocationSearch({
                 <Button
                   key={prediction.place_id}
                   variant="subtle"
-                  onClick={(e) => {
+                  onClick={() => {
                     if (loading) return;
-                    e.stopPropagation();
                     handlePlaceSelect(prediction);
+                    setShowDropdown(false);
+                    setPredictions([]);
                   }}
                   disabled={loading}
                   fullWidth
@@ -271,12 +297,10 @@ export function LocationSearch({
         )}
       </Box>
       <Group h={36} justify="apart" align="flex-end">
-        {rectangle ? (
+        {rectangles.length > 0 && (
           <Button variant="light" color="red" onClick={clearRectangle}>
             Clear Area
           </Button>
-        ) : (
-          <div />
         )}
       </Group>
       <Box h={300}>

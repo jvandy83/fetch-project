@@ -196,12 +196,12 @@ export function Search() {
   }, [geoBounds, searchResult, isLoading, page]);
 
   return (
-    <Container size="xl" pt="md" ref={containerRef} h="100%">
+    <Container pb="xl" size="xl" ref={containerRef}>
       <Stack
         gap="md"
         style={{ height: `${searchResult.dogs.length <= 6 ? "100vh" : ""}` }}
       >
-        <SimpleGrid pt="54" cols={{ base: 1, sm: 2 }} spacing="md">
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
           <Stack gap="xs">
             <MultiSelect
               data={breeds}
@@ -276,6 +276,7 @@ export function Search() {
               }
             />
             <LocationSearch
+              reset={resetAllFilters}
               onBoundsChange={(bounds) => {
                 setGeoBounds(bounds);
                 setPage(1);
@@ -315,14 +316,6 @@ export function Search() {
                 },
               ]}
             />
-            <Button
-              variant="light"
-              color="gray"
-              onClick={resetAllFilters}
-              leftSection={<IconFilterOff size={16} />}
-            >
-              Reset Filters
-            </Button>
           </Stack>
         </SimpleGrid>
 

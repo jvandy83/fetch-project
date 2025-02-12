@@ -80,8 +80,8 @@ export function Match() {
   }
 
   return (
-    <Container size="sm" pt="xl" h="100vh">
-      <Stack gap="xl" pt="48">
+    <Container size="sm">
+      <Stack gap="xl" justify="center">
         <Title order={2} ta="center">
           Congratulations! You've been matched with {matchedDog.name}
         </Title>

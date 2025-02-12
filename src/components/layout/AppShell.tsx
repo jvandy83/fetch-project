@@ -49,7 +49,10 @@ export function AppShell() {
 
   return (
     <MantineAppShell header={{ height: 64 }} padding="md" bg="gray.3">
-      <MantineAppShell.Header p="xs" style={{ position: "sticky", top: 0 }}>
+      <MantineAppShell.Header
+        p="xs"
+        style={{ position: "sticky", top: 0, zIndex: 1000 }}
+      >
         <Group justify="space-between" align="center">
           <Group>
             <Button variant="subtle" onClick={() => navigate("/")}>
@@ -64,7 +67,13 @@ export function AppShell() {
           <Button onClick={handleLogout}>Logout</Button>
         </Group>
       </MantineAppShell.Header>
-      <Outlet />
+
+      {/* Adjusted Main Content */}
+      <MantineAppShell.Main
+        style={{ paddingTop: 64, minHeight: "calc(100vh - 64px)" }}
+      >
+        <Outlet />
+      </MantineAppShell.Main>
     </MantineAppShell>
   );
 }
