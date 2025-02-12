@@ -44,7 +44,6 @@ export function LocationSearch({
 }: LocationSearchProps) {
   const [searchValue, setSearchValue] = useState("");
   const [predictions, setPredictions] = useState<Prediction[]>([]);
-  console.log("predictions", predictions);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -65,7 +64,6 @@ export function LocationSearch({
   const [debouncedSearch] = useDebouncedValue(searchValue, 500);
 
   const handlePlaceSelect = (prediction: Prediction) => {
-    console.log("handlePlaceSelect", prediction);
     if (!mapRef.current || loading) return;
 
     setLoading(true);
@@ -118,12 +116,6 @@ export function LocationSearch({
           const stateComponent = place.address_components?.find((component) =>
             component.types.includes("administrative_area_level_1")
           );
-
-          console.log("Found location components:", {
-            city: cityComponent?.long_name,
-            state: stateComponent?.short_name,
-            allComponents: place.address_components,
-          });
 
           if (onLocationFound && (cityComponent || stateComponent)) {
             onLocationFound({

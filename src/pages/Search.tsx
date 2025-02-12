@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDebouncedValue, useWindowScroll } from "@mantine/hooks";
@@ -21,16 +21,10 @@ import {
   NumberInput,
   TextInput,
   SimpleGrid,
-  Loader,
   Skeleton,
   Select,
 } from "@mantine/core";
-import {
-  IconHeart,
-  IconHeartFilled,
-  IconX,
-  IconFilterOff,
-} from "@tabler/icons-react";
+import { IconHeart, IconHeartFilled, IconX } from "@tabler/icons-react";
 import { searchDogs, getBreeds } from "../api/client";
 import { LocationSearch } from "../components/LocationSearch";
 
@@ -62,7 +56,6 @@ function DogCardSkeleton() {
 
 export function Search() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
   const [sortField, setSortField] = useState<"breed" | "name" | "age">("breed");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -136,8 +129,6 @@ export function Search() {
     refetchOnReconnect: false,
   });
 
-  console.log("searchResult", searchResult);
-
   const totalPages = Math.ceil(searchResult.total / DOGS_PER_PAGE);
 
   const toggleFavorite = (dogId: string) => {
@@ -185,15 +176,6 @@ export function Search() {
     setStatesFilter(undefined);
     setPage(1);
   };
-
-  useEffect(() => {
-    console.log("State changed:", {
-      geoBounds,
-      searchResult,
-      isLoading,
-      page,
-    });
-  }, [geoBounds, searchResult, isLoading, page]);
 
   return (
     <Container pb="xl" size="xl" ref={containerRef}>
@@ -402,7 +384,7 @@ export function Search() {
             style={{
               position: "fixed",
               bottom:
-                isNearBottom() && searchResult.dogs.length >= 12 ? 80 : 20,
+                isNearBottom() && searchResult.dogs.length >= 12 ? 120 : 20,
               transition: "bottom 0.2s ease",
               left: "50%",
               transform: "translateX(-50%)",

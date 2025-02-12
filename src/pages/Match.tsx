@@ -88,9 +88,6 @@ export function Match() {
         numberOfPieces={300}
         friction={0.97}
         tweenDuration={7000}
-        onConfettiComplete={() => {
-          console.log("Confetti complete");
-        }}
       />
 
       <Container size="sm">

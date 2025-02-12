@@ -11,20 +11,6 @@ export const apiClient = axios.create({
   },
 });
 
-// Add request interceptor if needed
-apiClient.interceptors.request.use(
-  (config) => {
-    // Log the request body for POST requests with endpoint info
-    if (config.method === "post") {
-      console.log(`Request to ${config.url}:`, config.data);
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
 // Add response interceptor
 apiClient.interceptors.response.use(
   (response) => response,
@@ -103,7 +89,6 @@ async function searchLocations(
     size: params.size,
     from: params.from,
   };
-  console.log("Locations search request:", requestBody);
 
   const { data } = await apiClient.post<{ results: Location[]; total: number }>(
     "/locations/search",
