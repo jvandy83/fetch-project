@@ -83,12 +83,7 @@ export function Match() {
   return (
     <>
       {/* Confetti Animation */}
-      <Confetti
-        recycle={false}
-        numberOfPieces={300}
-        friction={0.97}
-        tweenDuration={7000}
-      />
+      <Confetti recycle={false} numberOfPieces={300} />
 
       <Container size="sm">
         <Stack gap="xl" justify="center">
