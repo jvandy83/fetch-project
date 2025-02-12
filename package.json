@@ -20,6 +20,7 @@
     "@tanstack/react-query-devtools": "^5.66.0",
     "axios": "^1.7.9",
     "react": "^19.0.0",
+    "react-confetti": "^6.2.2",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.5"
   },

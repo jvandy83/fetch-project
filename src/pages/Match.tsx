@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import Confetti from "react-confetti"; // Import Confetti
 import {
   Container,
   Card,
@@ -80,46 +81,61 @@ export function Match() {
   }
 
   return (
-    <Container size="sm">
-      <Stack gap="xl" justify="center">
-        <Title order={2} ta="center">
-          Congratulations! You've been matched with {matchedDog.name}
-        </Title>
+    <>
+      {/* Confetti Animation */}
+      <Confetti
+        recycle={false}
+        numberOfPieces={300}
+        friction={0.97}
+        tweenDuration={7000}
+        onConfettiComplete={() => {
+          console.log("Confetti complete");
+        }}
+      />
 
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
-          <Card.Section pt="xl">
-            <Image
-              src={matchedDog.img}
-              height={300}
-              alt={matchedDog.name}
-              fit="contain"
-              fallbackSrc="https://placehold.co/600x300?text=No+Image"
-            />
-          </Card.Section>
+      <Container size="sm">
+        <Stack gap="xl" justify="center">
+          <Title order={2} ta="center">
+            Congratulations! You've been matched with {matchedDog.name}
+          </Title>
 
-          <Stack gap="md" mt="md">
-            <Text ta="center" fw={500} size="xl">
-              {matchedDog.name}
-            </Text>
-            <Group justify="space-around">
-              <Badge color="cyan" size="lg">
-                {matchedDog.age} years old
-              </Badge>
-              <Badge size="lg" color="blue">
-                {matchedDog.breed}
-              </Badge>
-            </Group>
+          <Card shadow="sm" padding="lg" radius="md" withBorder>
+            <Card.Section pt="xl">
+              <Image
+                src={matchedDog.img}
+                height={300}
+                alt={matchedDog.name}
+                fit="contain"
+                fallbackSrc="https://placehold.co/600x300?text=No+Image"
+              />
+            </Card.Section>
 
-            <Text ta="center" size="sm" c="dimmed">
-              Location: {matchedDog.zip_code}
-            </Text>
-          </Stack>
-        </Card>
+            <Stack gap="md" mt="md">
+              <Text ta="center" fw={500} size="xl">
+                {matchedDog.name}
+              </Text>
+              <Group justify="space-around">
+                <Badge color="cyan" size="lg">
+                  {matchedDog.age} years old
+                </Badge>
+                <Badge size="lg" color="blue">
+                  {matchedDog.breed}
+                </Badge>
+              </Group>
 
-        <Button onClick={() => navigate("/")} fullWidth>
-          Continue Searching
-        </Button>
-      </Stack>
-    </Container>
+              <Text ta="center" size="sm" c="dimmed">
+                Location: {matchedDog.zip_code}
+              </Text>
+            </Stack>
+          </Card>
+
+          <Button onClick={() => navigate("/")} fullWidth>
+            Continue Searching
+          </Button>
+        </Stack>
+      </Container>
+    </>
   );
 }
+
+export default Match;
